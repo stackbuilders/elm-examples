@@ -1,6 +1,4 @@
 module Cmd.Main exposing(..)
--- Read more about this program in the official Elm guide:
--- https://guide.elm-lang.org/architecture/effects/http.html
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -10,7 +8,7 @@ import Json.Decode as Decode
 
 main =
   Html.program
-    { init = init "cats"
+    { init = init
     , view = view
     , update = update
     , subscriptions = subscriptions
@@ -18,42 +16,79 @@ main =
 
 -- MODEL
 type alias Model =
-  { topic : String
-  , gifUrl : String
+  { pokemons : List Pokemon
+  , selectedPokemon : Pokemon
   }
 
-init : String -> (Model, Cmd Msg)
-init topic =
-  ( Model topic "waiting.gif"
-  , getRandomGif topic
+type alias Pokemon =
+  { url : Maybe String
+  , name : String
+  , id : Maybe Int
+  , abilities : Maybe (List Ability)
+  }
+
+type alias Ability = String
+
+init : (Model, Cmd Msg)
+init =
+  ( Model [] { url = Nothing, name = "", id = Nothing, abilities = Nothing }
+  , getPokemons 0
   )
 
 -- UPDATE
 type Msg
-  = MorePlease
-  | NewGif (Result Http.Error String)
+  = PokemonList (Result Http.Error (List Pokemon))
+  | SelectPokemon Pokemon
+  | RequestPokemon (Result Http.Error Pokemon)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    MorePlease ->
-      (model, getRandomGif model.topic)
+    PokemonList (Ok pokemonList) ->
+      ({ model | pokemons = pokemonList }, Cmd.none)
 
-    NewGif (Ok newUrl) ->
-      (Model model.topic newUrl, Cmd.none)
+    PokemonList (Err _) ->
+      (model, Cmd.none)
 
-    NewGif (Err _) ->
+    SelectPokemon pokemon ->
+      ({ model | selectedPokemon = pokemon}, getPokemon (Maybe.withDefault "" pokemon.url))
+
+    RequestPokemon (Ok pokemon) ->
+      ({ model | selectedPokemon = pokemon}, Cmd.none)
+
+    RequestPokemon (Err _) ->
       (model, Cmd.none)
 
 -- VIEW
 view : Model -> Html Msg
 view model =
   div []
-    [ h2 [] [text model.topic]
-    , button [ onClick MorePlease ] [ text "More Please!" ]
-    , br [] []
-    , img [src model.gifUrl] []
+    [ div []
+          [ ul []
+               (List.map viewPokemonList model.pokemons)
+          ]
+    , viewPokemon model.selectedPokemon
     ]
+
+viewPokemonList : Pokemon -> Html Msg
+viewPokemonList pokemon =
+  li [ onClick (SelectPokemon pokemon) ]
+   [ text pokemon.name
+   ]
+
+viewPokemon : Pokemon -> Html Msg
+viewPokemon pokemon =
+  div []
+      [ div []
+            [ text pokemon.name
+            ]
+      , div [][ viewAbilities (Maybe.withDefault [] pokemon.abilities) ]
+      ]
+
+viewAbilities : List Ability -> Html Msg
+viewAbilities abilities =
+  ul []
+     (List.map (\ab -> li [] [ text ab ]) abilities)
 
 -- SUBSCRIPTIONS
 subscriptions : Model -> Sub Msg
@@ -61,16 +96,36 @@ subscriptions model =
   Sub.none
 
 -- HTTP
-getRandomGif : String -> Cmd Msg
-getRandomGif topic =
-  let
-    url =
-      "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=" ++ topic
-  in
-    Http.send NewGif (Http.get url decodeGifUrl)
+getPokemons : Int -> Cmd Msg
+getPokemons offset =
+  Http.send PokemonList (Http.get (urlPokemons offset) decodePokemonList)
 
+getPokemon : String -> Cmd Msg
+getPokemon url =
+  Http.send RequestPokemon (Http.get url decodePokemon)
 
-decodeGifUrl : Decode.Decoder String
-decodeGifUrl =
-  Decode.at ["data", "image_url"] Decode.string
+-- Urls
+urlPokemons : Int -> String
+urlPokemons offset = "http://pokeapi.co/api/v2/pokemon/?offset=" ++ toString offset
 
+-- Decodes
+decodePokemonList : Decode.Decoder (List Pokemon)
+decodePokemonList =
+  Decode.field "results"
+    (Decode.list decodePokemon)
+
+decodePokemon : Decode.Decoder Pokemon
+decodePokemon =
+  Decode.map4 Pokemon
+    (Decode.maybe (Decode.field "url" Decode.string))
+    (Decode.field "name" Decode.string)
+    (Decode.maybe (Decode.field "id" Decode.int))
+    (Decode.maybe decodeAbilities)
+
+decodeAbilities : Decode.Decoder (List Ability)
+decodeAbilities =
+  Decode.field "abilities" (Decode.list decodeAbility)
+
+decodeAbility : Decode.Decoder Ability
+decodeAbility =
+  Decode.at ["ability", "name"] Decode.string
