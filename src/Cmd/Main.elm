@@ -60,10 +60,19 @@ update msg model =
       (model, Cmd.none)
 
 -- VIEW
+divStyle : Attribute msg
+divStyle =
+  style
+    [ ("float", "left")
+    , ("margin-right", "5px")
+    , ("height", "90px")
+    , ("width", "30%")
+    ]
+
 view : Model -> Html Msg
 view model =
   div []
-    [ div []
+    [ div [ divStyle ]
           [ ul []
                (List.map viewPokemonList model.pokemons)
           ]
@@ -79,10 +88,11 @@ viewPokemonList pokemon =
 viewPokemon : Pokemon -> Html Msg
 viewPokemon pokemon =
   div []
-      [ div []
-            [ text pokemon.name
+      [ div [ divStyle ]
+            [ img [ src (toString (Maybe.withDefault 0 pokemon.id) ++ ".png") ] [] 
+            , div [][text pokemon.name]
             ]
-      , div [][ viewAbilities (Maybe.withDefault [] pokemon.abilities) ]
+      , div [ divStyle ][ viewAbilities (Maybe.withDefault [] pokemon.abilities) ]
       ]
 
 viewAbilities : List Ability -> Html Msg
