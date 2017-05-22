@@ -9,6 +9,10 @@ If you're interested in Elm you can take a look at the following links:
 
 - [Elm guide](https://guide.elm-lang.org)
 - [Elm tutorial](https://www.elm-tutorial.org/en/)
+- [PokeAPI][poke-api]
+- [Images PokeAPI][poke-images]
 
 [quito-lambda]: https://www.meetup.com/Quito-Lambda-Meetup/
 [presentation]: https://docs.google.com/a/stackbuilders.com/presentation/d/1LYMMZOJAP12wCWieE6qpIrY_t3ahzv6_YASWCJrW7HE/edit?usp=sharing
+[poke-api]: http://pokeapi.co/
+[poke-images]: https://github.com/PokeAPI/sprites/tree/master/sprites/pokemon
