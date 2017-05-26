@@ -1,0 +1,3 @@
+[submodule "src/Subs"]
+	path = src/Subs
+	url = https://gitlab.com/paramander/typesafe-websockets/
