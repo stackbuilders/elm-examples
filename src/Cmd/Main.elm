@@ -51,13 +51,14 @@ update msg model =
       (model, Cmd.none)
 
     SelectPokemon pokemon ->
-      ({ model | selectedPokemon = pokemon}, getPokemon (Maybe.withDefault "" pokemon.url))
+      ({ model | selectedPokemon = pokemon }, getPokemon (Maybe.withDefault "" pokemon.url))
 
     RequestPokemon (Ok pokemon) ->
-      ({ model | selectedPokemon = pokemon}, Cmd.none)
+      ({ model | selectedPokemon = pokemon }, Cmd.none)
 
     RequestPokemon (Err _) ->
-      (model, Cmd.none)
+      let initialModel = Tuple.first init
+      in ({ initialModel | pokemons = model.pokemons }, Cmd.none)
 
 -- VIEW
 divStyle : Attribute msg
@@ -82,14 +83,14 @@ view model =
 viewPokemonList : Pokemon -> Html Msg
 viewPokemonList pokemon =
   li [ onClick (SelectPokemon pokemon) ]
-   [ text pokemon.name
+   [ button [] [ text pokemon.name ]
    ]
 
 viewPokemon : Pokemon -> Html Msg
 viewPokemon pokemon =
   div []
       [ div [ divStyle ]
-            [ img [ src (toString (Maybe.withDefault 0 pokemon.id) ++ ".png") ] [] 
+            [ img [ src (toString (Maybe.withDefault 0 pokemon.id) ++ ".png") ] []
             , div [][text pokemon.name]
             ]
       , div [ divStyle ][ viewAbilities (Maybe.withDefault [] pokemon.abilities) ]
