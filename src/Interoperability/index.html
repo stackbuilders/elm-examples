@@ -32,7 +32,7 @@
         var results = [ dt.classify(testCases[0]), dt.classify(testCases[1]), dt.classify(testCases[2]) ];
         results = results.map((obj) => Object.keys(obj)[0]);
 
-        app.ports.recieveData.send((results));
+        app.ports.recieveData.send(results);
       });
     </script>
   </body>

@@ -1,6 +1,7 @@
 port module Interoperability.Main exposing(..)
 
 import Html exposing(..)
+import Html.Events exposing(onClick)
 import Debug exposing(log)
 import String exposing(join)
 
@@ -342,9 +343,9 @@ initData =
 init : (Model, Cmd msg)
 init =
   let initialModel = []
-  in (initialModel, sendData initData)
+  in (initialModel, Cmd.none)
 
-type Msg = RecieveFromJS (List String)
+type Msg = RecieveFromJS (List String) | Send
 
 -- Update
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -354,18 +355,22 @@ update msg model =
       let newModel = results
       in (newModel, Cmd.none)
 
+    Send ->
+      (model, sendData initData)
+
 -- View
 view : Model -> Html Msg
 view model =
   div []
-      [ ul []
+      [ button [ onClick Send ][ text "Click on me!" ]
+      , ul []
            (List.map viewTest (List.map2 (,) testCases model))
       ]
 
 viewTest : (List Float, String) -> Html msg
 viewTest (features, label) =
   li []
-     [ text ((toString features) ++ " ==> " ++ label) 
+     [ text ((toString features) ++ " ==> " ++ label)
      ]
 
 -- Ports
