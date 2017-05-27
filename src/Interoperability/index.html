@@ -8,11 +8,9 @@
     <div id="app">
     </div>
     <script type="text/javascript" src="main.js"></script>
-    <script type="text/javascript" src="https://www.lactame.com/lib/ml/2.0.0/ml.min.js"></script>
+    <!--    For more documentation about the library take a look at: http://joonku.com/project/machine_learning/apidoc-->
+    <script type="text/javascript" src="http://joonku.com/js/machine_learning.min.js"></script>
     <script type="text/javascript">
-      // FNN
-      var fnn = new ML.NN.FNN();
-
       // ELM
       var node = document.getElementById('app');
       var app = Elm.Interoperability.Main.embed(node);
@@ -25,12 +23,16 @@
         console.log("Features: ", features);
         console.log("Labels: ", labels);
 
-        fnn.train(features, labels);
+        var dt = new ml.DecisionTree({
+            data : features,
+            result : labels
+        });
 
-        // Let's see if it is separable by testing on the training data
-        var results = fnn.predict(testCases);
+        dt.build();
+        var results = [ dt.classify(testCases[0]), dt.classify(testCases[1]), dt.classify(testCases[2]) ];
+        results = results.map((obj) => Object.keys(obj)[0]);
 
-        app.ports.recieveData.send(results);
+        app.ports.recieveData.send((results));
       });
     </script>
   </body>

@@ -8,7 +8,7 @@ main =
   program
     { init = init
     , update = update
-    , view = \model -> div [] [ text (join ", " model) ]
+    , view = view
     , subscriptions = subscriptions
     }
 
@@ -353,6 +353,20 @@ update msg model =
     RecieveFromJS results ->
       let newModel = results
       in (newModel, Cmd.none)
+
+-- View
+view : Model -> Html Msg
+view model =
+  div []
+      [ ul []
+           (List.map viewTest (List.map2 (,) testCases model))
+      ]
+
+viewTest : (List Float, String) -> Html msg
+viewTest (features, label) =
+  li []
+     [ text ((toString features) ++ " ==> " ++ label) 
+     ]
 
 -- Ports
 -- port for sending data out to JavaScript
