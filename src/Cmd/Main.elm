@@ -31,9 +31,10 @@ type alias Ability = String
 
 init : (Model, Cmd Msg)
 init =
-  ( Model [] { url = Nothing, name = "", id = Nothing, abilities = Nothing }
-  , getPokemons 0
-  )
+  let initModel = Model [] { url = Nothing, name = "", id = Nothing, abilities = Nothing }
+      offset = 0
+      cmdGetPokemons = getPokemons offset
+  in (initModel, cmdGetPokemons)
 
 -- UPDATE
 type Msg
@@ -51,14 +52,16 @@ update msg model =
       (model, Cmd.none)
 
     SelectPokemon pokemon ->
-      ({ model | selectedPokemon = pokemon }, getPokemon (Maybe.withDefault "" pokemon.url))
+      let urlPokemon = Maybe.withDefault "" pokemon.url
+          cmdGetPokemon = getPokemon urlPokemon
+      in (model, cmdGetPokemon)
 
     RequestPokemon (Ok pokemon) ->
-      ({ model | selectedPokemon = pokemon }, Cmd.none)
+      let newModel = { model | selectedPokemon = pokemon }
+      in (newModel, Cmd.none)
 
     RequestPokemon (Err _) ->
-      let initialModel = Tuple.first init
-      in ({ initialModel | pokemons = model.pokemons }, Cmd.none)
+      (model, Cmd.none)
 
 -- VIEW
 divStyle : Attribute msg
