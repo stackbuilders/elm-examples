@@ -2,8 +2,6 @@ port module Interoperability.Main exposing(..)
 
 import Html exposing(..)
 import Html.Events exposing(onClick)
-import Debug exposing(log)
-import String exposing(join)
 
 main =
   program
